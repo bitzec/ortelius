@@ -15,7 +15,7 @@ go get -tags 'mysql' github.com/golang-migrate/migrate/cmd/migrate
 go test -i ./...
 
 # Lint
-$GOPATH/bin/golangci-lint run --deadline=1m
+#$GOPATH/bin/golangci-lint run --deadline=1m
 
 # Migrate DB
 $GOPATH/bin/migrate \
