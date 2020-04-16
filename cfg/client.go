@@ -125,10 +125,10 @@ func NewClientConfig(context string, file string) (*ClientConfig, error) {
 
 	// Collect config data into a ClientConfig object
 	return &ClientConfig{
+		NetworkID:     v.GetUint32(configKeysNetworkID),
 		Context:       context,
 		Chains:        chains,
 		ServiceConfig: serviceConf,
-		NetworkID:     v.GetUint32(configKeysNetworkID),
 		IPCRoot:       v.GetString(configKeysIPCRoot),
 		KafkaConfig:   getKafkaConf(getSubViper(v, configKeysKafka)),
 		FilterConfig:  getFilterConf(getSubViper(v, configKeysFilter)),

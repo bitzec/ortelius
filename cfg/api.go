@@ -30,6 +30,7 @@ func NewAPIConfig(file string) (APIConfig, error) {
 	}
 
 	return APIConfig{
+		NetworkID:     v.GetUint32(configKeysNetworkID),
 		ListenAddr:    v.GetString(configKeysListenAddr),
 		ServiceConfig: serviceConf,
 	}, nil
