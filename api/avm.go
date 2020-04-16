@@ -25,7 +25,7 @@ type AVMServerContext struct {
 }
 
 func NewAVMRouter(router *web.Router, conf cfg.ServiceConfig, chainID ids.ID, chainAlias string, networkID uint32) error {
-	index, err := avm_index.New(conf, chainID)
+	index, err := avm_index.New(conf, networkID, chainID)
 	if err != nil {
 		return err
 	}
