@@ -84,7 +84,7 @@ func (r *DBIndex) GetTxs() ([]timestampedTx, error) {
 func (r *DBIndex) GetTx(_ ids.ID) ([]byte, error) {
 	bytes := []byte{}
 	err := r.newDBSession("get_tx").
-		Select("canonical_serialization").
+		Select("json_serialization").
 		From("avm_transactions").
 		Where("chain_id = ?", r.chainID.Bytes()).
 		Limit(1).
