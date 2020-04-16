@@ -96,12 +96,9 @@ func NewClientConfig(context string, file string) (*ClientConfig, error) {
 			return nil, errors.New("Chain config must a string map")
 		}
 
-		id := ids.Empty
-		if idStr != "11111111111111111111111111111111LpoYY" {
-			id, err = ids.FromString(idStr)
-			if err != nil {
-				return nil, err
-			}
+		id, err := ids.FromString(idStr)
+		if err != nil {
+			return nil, err
 		}
 
 		alias, ok := confMap[configKeysChainsAlias].(string)
