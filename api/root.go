@@ -13,13 +13,26 @@ import (
 )
 
 type index struct {
-	Chains cfg.ChainsConfig
+	Chains map[string]chainInfo
+}
+
+type chainInfo struct {
+	Alias  string `json:"alias"`
+	VMType string `json:"vmType"`
 }
 
 type RootRequestContext struct{}
 
 func newRootRouter(chainsConf cfg.ChainsConfig) (*web.Router, error) {
-	indexBytes, err := json.Marshal(&index{Chains: chainsConf})
+	i := &index{Chains: make(map[string]chainInfo, len(chainsConf))}
+	for id, info := range chainsConf {
+		i.Chains[id.String()] = chainInfo{
+			Alias:  info.Alias,
+			VMType: info.VMType,
+		}
+	}
+
+	indexBytes, err := json.Marshal(i)
 	if err != nil {
 		return nil, err
 	}

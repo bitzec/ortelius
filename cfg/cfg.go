@@ -21,7 +21,7 @@ const (
 	configKeysChains       = "chains"
 	configKeysChainsID     = "id"
 	configKeysChainsAlias  = "alias"
-	configKeysChainsVMType = "vmType"
+	configKeysChainsVMType = "vmtype"
 
 	configKeysRedis = "redis"
 	configKeysDB    = "db"
@@ -65,8 +65,8 @@ type Common struct {
 }
 
 type ChainConfig struct {
-	Alias  string `json:"alias"`
-	VMType string `json:"vmType"`
+	Alias  string
+	VMType string
 }
 
 type ChainsConfig map[ids.ID]ChainConfig
@@ -168,7 +168,7 @@ func getChainsConfig(v *viper.Viper) (ChainsConfig, error) {
 			return nil, ErrChainsConfigMustBeStringMap
 		}
 
-		vmType, ok := confMap[configKeysChainsAlias].(string)
+		vmType, ok := confMap[configKeysChainsVMType].(string)
 		if !ok {
 			return nil, ErrChainsConfigMustBeStringMap
 		}

@@ -6,6 +6,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -78,7 +79,8 @@ func routerFactorForVM(vmType string) routerFactory {
 	case "cvm":
 		return NewCVMRouter
 	}
-	return undefinedRouterFactory
+	fmt.Println("type:", vmType)
+	return undefinedRouterFactory(vmType)
 }
 
 func newRouter(conf cfg.APIConfig) (*web.Router, error) {
@@ -99,6 +101,8 @@ func newRouter(conf cfg.APIConfig) (*web.Router, error) {
 	return router, nil
 }
 
-func undefinedRouterFactory(_ *web.Router, _ cfg.ServiceConfig, _ uint32, _ ids.ID, _ string) error {
-	return ErrUndefinedRouterFactory
+func undefinedRouterFactory(vmType string) routerFactory {
+	return func(_ *web.Router, _ cfg.ServiceConfig, _ uint32, _ ids.ID, _ string) error {
+		return ErrUndefinedRouterFactory
+	}
 }
