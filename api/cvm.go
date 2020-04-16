@@ -4,14 +4,13 @@
 package api
 
 import (
-	"errors"
-
 	"github.com/gocraft/web"
 
 	"github.com/ava-labs/gecko/ids"
+
 	"github.com/ava-labs/ortelius/cfg"
 )
 
-func NewCVMRouter(_ *web.Router, _ cfg.ServiceConfig, _ ids.ID, _ string, _ uint32) error {
-	return errors.New("CVM not implemented")
+func NewCVMRouter(_ *web.Router, _ cfg.ServiceConfig, _ uint32, _ ids.ID, _ string) error {
+	return ErrUnimplemented
 }

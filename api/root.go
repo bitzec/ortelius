@@ -9,28 +9,17 @@ import (
 
 	"github.com/gocraft/web"
 
-	"github.com/ava-labs/gecko/ids"
 	"github.com/ava-labs/ortelius/cfg"
 )
 
 type index struct {
-	ChainAliases cfg.ChainAliasConfig `json:"chainAliases"`
-	ChainIDs     []ids.ID             `json:"chainIDs"`
+	Chains cfg.ChainsConfig
 }
 
 type RootRequestContext struct{}
 
-func newRootRouter(chainAliases cfg.ChainAliasConfig) (*web.Router, error) {
-	// TODO: Get real chain ids
-	chainIDs := make([]ids.ID, 0, len(chainAliases))
-	for _, chainID := range chainAliases {
-		chainIDs = append(chainIDs, chainID)
-	}
-
-	indexBytes, err := json.Marshal(&index{
-		ChainAliases: chainAliases,
-		ChainIDs:     chainIDs,
-	})
+func newRootRouter(chainsConf cfg.ChainsConfig) (*web.Router, error) {
+	indexBytes, err := json.Marshal(&index{Chains: chainsConf})
 	if err != nil {
 		return nil, err
 	}

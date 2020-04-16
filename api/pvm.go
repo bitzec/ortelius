@@ -20,7 +20,7 @@ type PVMServerContext struct {
 	index      *pvm_index.Index
 }
 
-func NewPVMRouter(router *web.Router, conf cfg.ServiceConfig, chainID ids.ID, chainAlias string, networkID uint32) error {
+func NewPVMRouter(router *web.Router, conf cfg.ServiceConfig, networkID uint32, chainID ids.ID, chainAlias string) error {
 	index, err := pvm_index.New(conf, chainID)
 	if err != nil {
 		return err

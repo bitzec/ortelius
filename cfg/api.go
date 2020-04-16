@@ -9,8 +9,7 @@ const (
 
 // APIConfig manages configuration data for the API app
 type APIConfig struct {
-	NetworkID uint32
-	ServiceConfig
+	Common
 	ListenAddr string
 }
 
@@ -24,14 +23,13 @@ func NewAPIConfig(file string) (APIConfig, error) {
 		return APIConfig{}, err
 	}
 
-	serviceConf, err := getServiceConfig(v)
+	common, err := getCommonConfig(v)
 	if err != nil {
 		return APIConfig{}, err
 	}
 
 	return APIConfig{
-		NetworkID:     v.GetUint32(configKeysNetworkID),
-		ListenAddr:    v.GetString(configKeysListenAddr),
-		ServiceConfig: serviceConf,
+		Common:     common,
+		ListenAddr: v.GetString(configKeysListenAddr),
 	}, nil
 }

@@ -24,7 +24,7 @@ type AVMServerContext struct {
 	index      *avm_index.Index
 }
 
-func NewAVMRouter(router *web.Router, conf cfg.ServiceConfig, chainID ids.ID, chainAlias string, networkID uint32) error {
+func NewAVMRouter(router *web.Router, conf cfg.ServiceConfig, networkID uint32, chainID ids.ID, chainAlias string) error {
 	index, err := avm_index.New(conf, networkID, chainID)
 	if err != nil {
 		return err

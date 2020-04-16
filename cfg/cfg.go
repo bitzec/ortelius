@@ -4,6 +4,8 @@
 package cfg
 
 import (
+	"errors"
+
 	"github.com/ava-labs/gecko/ids"
 	"github.com/ava-labs/gecko/utils/logging"
 	"github.com/go-redis/redis"
@@ -13,15 +15,20 @@ import (
 const (
 	appName = "ortelius"
 
-	configKeysNetworkID    = "networkID"
-	configKeyLogDirectory  = "logDirectory"
-	configKeysRedis        = "redis"
-	configKeysDB           = "db"
-	configKeysChainAliases = "chainAliases"
+	configKeysNetworkID   = "networkID"
+	configKeyLogDirectory = "logDirectory"
+
+	configKeysChains       = "chains"
+	configKeysChainsID     = "id"
+	configKeysChainsAlias  = "alias"
+	configKeysChainsVMType = "vmType"
+
+	configKeysRedis = "redis"
+	configKeysDB    = "db"
 )
 
 var (
-	requiredChainAliases = []string{"x"}
+	ErrChainsConfigMustBeStringMap = errors.New("Chain config must a string map")
 
 	defaultCommon = map[string]interface{}{
 		configKeysNetworkID:   12345,
@@ -36,26 +43,45 @@ var (
 			"dsn":    "root:password@tcp(127.0.0.1:3306)/ortelius_dev",
 			"txDB":   false,
 		},
-		configKeysChainAliases: map[string]interface{}{
-			"x": "4R5p2RXDGLqaifZE4hHWH9owe34pfoBULn1DrQTWivjg8o4aH",
+		configKeysChains: map[string]map[string]interface{}{
+			"4R5p2RXDGLqaifZE4hHWH9owe34pfoBULn1DrQTWivjg8o4aH": {
+				configKeysChainsID:     "4R5p2RXDGLqaifZE4hHWH9owe34pfoBULn1DrQTWivjg8o4aH",
+				configKeysChainsAlias:  "X",
+				configKeysChainsVMType: "avm",
+			},
+			"11111111111111111111111111111111LpoYY": {
+				configKeysChainsID:     "11111111111111111111111111111111LpoYY",
+				configKeysChainsAlias:  "P",
+				configKeysChainsVMType: "pvm",
+			},
 		},
 	}
 )
+
+type Common struct {
+	NetworkID uint32
+	ChainsConfig
+	ServiceConfig
+}
+
+type ChainConfig struct {
+	Alias  string `json:"alias"`
+	VMType string `json:"vmType"`
+}
+
+type ChainsConfig map[ids.ID]ChainConfig
+
+type ServiceConfig struct {
+	Redis   *redis.Options
+	DB      *DBConfig
+	Logging logging.Config
+}
 
 type DBConfig struct {
 	DSN    string
 	Driver string
 	TXDB   bool
 }
-
-type ServiceConfig struct {
-	ChainAliasConfig
-	Redis   *redis.Options
-	DB      *DBConfig
-	Logging logging.Config
-}
-
-type ChainAliasConfig map[string]ids.ID
 
 func getConfigViper(file string, defaults map[string]interface{}) (*viper.Viper, error) {
 	v := viper.NewWithOptions(viper.KeyDelimiter("_"))
@@ -81,12 +107,86 @@ func getConfigViper(file string, defaults map[string]interface{}) (*viper.Viper,
 	return v, nil
 }
 
-func getLogConf(v *viper.Viper) logging.Config {
+func getSubViper(v *viper.Viper, name string) *viper.Viper {
+	if v == nil {
+		return nil
+	}
+
+	v = v.Sub(name)
+	if v == nil {
+		return nil
+	}
+
+	v.SetEnvPrefix(appName + "_" + name)
+	v.AutomaticEnv()
+	return v
+}
+
+func getCommonConfig(v *viper.Viper) (Common, error) {
+	var err error
+	c := Common{
+		NetworkID:     v.GetUint32(configKeysNetworkID),
+		ServiceConfig: getServiceConfig(v),
+	}
+	c.ChainsConfig, err = getChainsConfig(v)
+	if err != nil {
+		return c, err
+	}
+
+	return c, nil
+}
+
+func getLogConfig(v *viper.Viper) logging.Config {
 	// We ignore the error because it's related to creating the default directory
 	// but we are going to override it anyways
 	logConf, _ := logging.DefaultConfig()
 	logConf.Directory = v.GetString(configKeyLogDirectory)
 	return logConf
+}
+
+func getChainsConfig(v *viper.Viper) (ChainsConfig, error) {
+	chainsConf := v.GetStringMap(configKeysChains)
+	chains := make(ChainsConfig, len(chainsConf))
+	for _, chainConf := range chainsConf {
+		confMap, ok := chainConf.(map[string]interface{})
+		if !ok {
+			return nil, ErrChainsConfigMustBeStringMap
+		}
+
+		idStr, ok := confMap[configKeysChainsID].(string)
+		if !ok {
+			return nil, ErrChainsConfigMustBeStringMap
+		}
+
+		id, err := ids.FromString(idStr)
+		if err != nil {
+			return nil, err
+		}
+
+		alias, ok := confMap[configKeysChainsAlias].(string)
+		if !ok {
+			return nil, ErrChainsConfigMustBeStringMap
+		}
+
+		vmType, ok := confMap[configKeysChainsAlias].(string)
+		if !ok {
+			return nil, ErrChainsConfigMustBeStringMap
+		}
+
+		chains[id] = ChainConfig{
+			Alias:  alias,
+			VMType: vmType,
+		}
+	}
+	return chains, nil
+}
+
+func getServiceConfig(v *viper.Viper) ServiceConfig {
+	return ServiceConfig{
+		Redis:   getRedisConfig(getSubViper(v, configKeysRedis)),
+		DB:      getDBConfig(getSubViper(v, configKeysDB)),
+		Logging: getLogConfig(v),
+	}
 }
 
 func getRedisConfig(v *viper.Viper) *redis.Options {
@@ -110,48 +210,4 @@ func getDBConfig(v *viper.Viper) *DBConfig {
 		DSN:    v.GetString("dsn"),
 		TXDB:   v.GetBool("txDB"),
 	}
-}
-
-func getChainAliasConfig(v *viper.Viper) (conf ChainAliasConfig, err error) {
-	if v == nil {
-		return nil, nil
-	}
-
-	conf = ChainAliasConfig{}
-	for _, alias := range requiredChainAliases {
-		chainIDStr := v.GetString(alias)
-		conf[alias], err = ids.FromString(chainIDStr)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return conf, nil
-}
-
-func getServiceConfig(v *viper.Viper) (ServiceConfig, error) {
-	chainAliases, err := getChainAliasConfig(getSubViper(v, configKeysChainAliases))
-	if err != nil {
-		return ServiceConfig{}, err
-	}
-	return ServiceConfig{
-		Redis:            getRedisConfig(getSubViper(v, configKeysRedis)),
-		DB:               getDBConfig(getSubViper(v, configKeysDB)),
-		Logging:          getLogConf(v),
-		ChainAliasConfig: chainAliases,
-	}, nil
-}
-
-func getSubViper(v *viper.Viper, name string) *viper.Viper {
-	if v == nil {
-		return nil
-	}
-
-	v = v.Sub(name)
-	if v == nil {
-		return nil
-	}
-
-	v.SetEnvPrefix(appName + "_" + name)
-	v.AutomaticEnv()
-	return v
 }

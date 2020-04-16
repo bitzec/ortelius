@@ -79,8 +79,8 @@ func (c *Client) Listen() error {
 
 	// Create a backend for each chain we want to watch and wait for them to exit
 	wg := &sync.WaitGroup{}
-	wg.Add(len(c.conf.Chains))
-	for chainID := range c.conf.Chains {
+	wg.Add(len(c.conf.ChainsConfig))
+	for chainID := range c.conf.ChainsConfig {
 		backend, err := c.factory(c.conf, c.conf.NetworkID, chainID)
 		if err != nil {
 			log.Error("Initialization error: %s", err.Error())
