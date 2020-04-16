@@ -18,8 +18,6 @@ const (
 	XChainAlias = "x"
 	PChainAlias = "p"
 	CChainAlias = "c"
-
-	AVANetworkID uint32 = 12345
 )
 
 type Server struct {
@@ -33,7 +31,7 @@ func NewServer(conf cfg.APIConfig) (*Server, error) {
 		return nil, err
 	}
 
-	router, err := newRouter(conf.ServiceConfig)
+	router, err := newRouter(conf)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +60,7 @@ func (s *Server) Shutdown() error {
 	return s.server.Shutdown(ctx)
 }
 
-func newRouter(conf cfg.ServiceConfig) (*web.Router, error) {
+func newRouter(conf cfg.APIConfig) (*web.Router, error) {
 	// Create a root router that does the work common to all requests and provides
 	// chain-agnostic endpoints
 	router, err := newRootRouter(conf.ChainAliasConfig)
@@ -72,21 +70,21 @@ func newRouter(conf cfg.ServiceConfig) (*web.Router, error) {
 
 	// Create routers for the main chains
 	if xChainID, ok := conf.ChainAliasConfig[XChainAlias]; ok {
-		err = NewAVMRouter(router, conf, xChainID, XChainAlias, AVANetworkID)
+		err = NewAVMRouter(router, conf.ServiceConfig, xChainID, XChainAlias, conf.NetworkID)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if pChainID, ok := conf.ChainAliasConfig[PChainAlias]; ok {
-		err = NewPVMRouter(router, conf, pChainID, PChainAlias, AVANetworkID)
+		err = NewPVMRouter(router, conf.ServiceConfig, pChainID, PChainAlias, conf.NetworkID)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if cChainID, ok := conf.ChainAliasConfig[CChainAlias]; ok {
-		err = NewCVMRouter(router, conf, cChainID, CChainAlias, AVANetworkID)
+		err = NewCVMRouter(router, conf.ServiceConfig, cChainID, CChainAlias, conf.NetworkID)
 		if err != nil {
 			return nil, err
 		}

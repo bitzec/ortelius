@@ -9,6 +9,7 @@ const (
 
 // APIConfig manages configuration data for the API app
 type APIConfig struct {
+	NetworkID uint32
 	ServiceConfig
 	ListenAddr string
 }

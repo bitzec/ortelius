@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	configKeysNetworkID = "networkID"
-	configKeysIPCRoot   = "ipcRoot"
+	configKeysIPCRoot = "ipcRoot"
 
 	configKeysFilter    = "filter"
 	configKeysFilterMin = "min"
@@ -45,10 +44,10 @@ type FilterConfig struct {
 
 // ClientConfig manages configuration data for the client app
 type ClientConfig struct {
-	Context string
-
+	Context   string
 	NetworkID uint32
-	IPCRoot   string
+
+	IPCRoot string
 
 	Chains map[ids.ID]ChainConfig
 
@@ -61,7 +60,6 @@ type ClientConfig struct {
 func NewClientConfig(context string, file string) (*ClientConfig, error) {
 	// Parse config file with viper and set defaults
 	v, err := getConfigViper(file, map[string]interface{}{
-		configKeysNetworkID:    12345,
 		configKeysKafkaBrokers: "127.0.0.1:9092",
 		configKeysChains: map[string]map[string]interface{}{
 			"4R5p2RXDGLqaifZE4hHWH9owe34pfoBULn1DrQTWivjg8o4aH": {

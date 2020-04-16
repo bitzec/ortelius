@@ -13,6 +13,7 @@ import (
 const (
 	appName = "ortelius"
 
+	configKeysNetworkID    = "networkID"
 	configKeyLogDirectory  = "logDirectory"
 	configKeysRedis        = "redis"
 	configKeysDB           = "db"
@@ -23,6 +24,7 @@ var (
 	requiredChainAliases = []string{"x"}
 
 	defaultCommon = map[string]interface{}{
+		configKeysNetworkID:   12345,
 		configKeyLogDirectory: "/tmp/ortelius/logs",
 		configKeysRedis: map[string]interface{}{
 			"addr":     "127.0.0.1:6379",
