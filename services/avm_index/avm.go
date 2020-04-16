@@ -18,7 +18,7 @@ import (
 
 // newAVM creates an producer instance that we can use to parse txs
 func newAVM(chainID ids.ID, networkID uint32) (*avm.VM, error) {
-	g, err := genesis.VMGenesis(12345, avm.ID)
+	g, err := genesis.VMGenesis(networkID, avm.ID)
 	if err != nil {
 		return nil, err
 	}

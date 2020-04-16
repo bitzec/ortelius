@@ -36,14 +36,14 @@ type consumer struct {
 }
 
 // newConsumer creates an consumer for the given config
-func newConsumer(conf *cfg.ClientConfig, chainID ids.ID) (backend, error) {
+func newConsumer(conf *cfg.ClientConfig, networkID uint32, chainID ids.ID) (backend, error) {
 	var (
 		err error
 		c   = &consumer{}
 	)
 
 	// Create service backend
-	c.service, err = createServices(conf.ServiceConfig, chainID)
+	c.service, err = createServices(conf.ServiceConfig, networkID, chainID)
 	if err != nil {
 		return nil, err
 	}
@@ -111,9 +111,9 @@ func getNextMessage(r *kafka.Reader) (*message, error) {
 	}, nil
 }
 
-func createServices(conf cfg.ServiceConfig, chainID ids.ID) (services.FanOutService, error) {
+func createServices(conf cfg.ServiceConfig, networkID uint32, chainID ids.ID) (services.FanOutService, error) {
 	// Create and bootstrap an AVMIndex
-	avmIndex, err := avm_index.New(conf, chainID)
+	avmIndex, err := avm_index.New(conf, networkID, chainID)
 	if err != nil {
 		return nil, err
 	}

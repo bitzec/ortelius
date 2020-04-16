@@ -27,7 +27,7 @@ type backend interface {
 	ProcessNextMessage() (*message, error)
 	Close() error
 }
-type backendFactory func(*cfg.ClientConfig, ids.ID) (backend, error)
+type backendFactory func(*cfg.ClientConfig, uint32, ids.ID) (backend, error)
 
 type message struct {
 	id        ids.ID
@@ -81,7 +81,7 @@ func (c *Client) Listen() error {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(c.conf.Chains))
 	for chainID := range c.conf.Chains {
-		backend, err := c.factory(c.conf, chainID)
+		backend, err := c.factory(c.conf, c.conf.NetworkID, chainID)
 		if err != nil {
 			log.Error("Initialization error: %s", err.Error())
 			return err

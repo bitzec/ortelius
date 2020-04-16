@@ -27,16 +27,16 @@ type Index struct {
 	cache   *RedisIndex
 }
 
-func New(conf cfg.ServiceConfig, chainID ids.ID) (*Index, error) {
+func New(conf cfg.ServiceConfig, networkID uint32, chainID ids.ID) (*Index, error) {
 	conns, err := services.NewConnectionsFromConfig(conf)
 	if err != nil {
 		return nil, err
 	}
-	return newForConnections(conns, chainID)
+	return newForConnections(conns, networkID, chainID)
 }
 
-func newForConnections(conns *services.Connections, chainID ids.ID) (*Index, error) {
-	vm, err := newAVM(chainID, 12345)
+func newForConnections(conns *services.Connections, networkID uint32, chainID ids.ID) (*Index, error) {
+	vm, err := newAVM(chainID, networkID)
 	if err != nil {
 		return nil, err
 	}
