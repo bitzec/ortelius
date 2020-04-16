@@ -10,7 +10,6 @@ import (
 	"github.com/ava-labs/gecko/genesis"
 	"github.com/ava-labs/gecko/ids"
 	"github.com/ava-labs/gecko/vms/avm"
-	"github.com/go-redis/redis"
 
 	"github.com/ava-labs/ortelius/cfg"
 	"github.com/ava-labs/ortelius/services"
@@ -110,13 +109,13 @@ func (i *Index) GetTxsForAddr(addr ids.ShortID) ([]timestampedTx, error) {
 }
 
 func (i *Index) GetTx(txID ids.ID) ([]byte, error) {
-	tx, err := i.cache.GetTx(txID)
-	if err == nil {
-		return tx, nil
-	}
-	if err != redis.Nil {
-		return nil, err
-	}
+	// tx, err := i.cache.GetTx(txID)
+	// if err == nil {
+	// 	return tx, nil
+	// }
+	// if err != redis.Nil {
+	// 	return nil, err
+	// }
 
 	return i.db.GetTx(txID)
 }
