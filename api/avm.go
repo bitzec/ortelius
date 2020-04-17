@@ -181,7 +181,7 @@ func (c *AVMServerContext) GetTx(w web.ResponseWriter, r *web.Request) {
 		return
 	}
 
-	writeJSON(w, tx)
+	writeObject(w, tx)
 }
 
 //

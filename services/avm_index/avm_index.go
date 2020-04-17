@@ -100,23 +100,15 @@ func (i *Index) GetTxCount() (int64, error) {
 	return i.db.GetTxCount()
 }
 
-func (i *Index) GetTxs() ([]timestampedTx, error) {
+func (i *Index) GetTxs() ([]displayTx, error) {
 	return i.db.GetTxs()
 }
 
-func (i *Index) GetTxsForAddr(addr ids.ShortID) ([]timestampedTx, error) {
+func (i *Index) GetTxsForAddr(addr ids.ShortID) ([]*displayTx, error) {
 	return i.db.GetTxsForAddr(addr)
 }
 
-func (i *Index) GetTx(txID ids.ID) ([]byte, error) {
-	// tx, err := i.cache.GetTx(txID)
-	// if err == nil {
-	// 	return tx, nil
-	// }
-	// if err != redis.Nil {
-	// 	return nil, err
-	// }
-
+func (i *Index) GetTx(txID ids.ID) (*displayTx, error) {
 	return i.db.GetTx(txID)
 }
 

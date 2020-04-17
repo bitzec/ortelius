@@ -70,10 +70,10 @@ func (r *DBIndex) GetRecentTxs(_ ids.ID, _ int64) ([]ids.ID, error) {
 	return nil, nil
 }
 
-func (r *DBIndex) GetTxs() ([]timestampedTx, error) {
-	txs := []timestampedTx{}
+func (r *DBIndex) GetTxs() ([]displayTx, error) {
+	txs := []displayTx{}
 	_, err := r.newDBSession("get_tx_count").
-		Select("json_serialization", "ingested_at").
+		Select("id", "json_serialization", "ingested_at").
 		From("avm_transactions").
 		Where("chain_id = ?", r.chainID.Bytes()).
 		Limit(PaginationLimit).
@@ -81,26 +81,27 @@ func (r *DBIndex) GetTxs() ([]timestampedTx, error) {
 	return txs, err
 }
 
-func (r *DBIndex) GetTx(_ ids.ID) ([]byte, error) {
-	bytes := []byte{}
+func (r *DBIndex) GetTx(id ids.ID) (*displayTx, error) {
+	tx := &displayTx{}
 	err := r.newDBSession("get_tx").
-		Select("json_serialization").
+		Select("id", "json_serialization", "ingested_at").
 		From("avm_transactions").
+		Where("id = ?", id.Bytes()).
 		Where("chain_id = ?", r.chainID.Bytes()).
 		Limit(1).
-		LoadOne(&bytes)
-	return bytes, err
+		LoadOne(tx)
+	return tx, err
 }
 
 //
 // Address index
 //
 
-func (r *DBIndex) GetTxsForAddr(addr ids.ShortID) ([]timestampedTx, error) {
-	txs := []timestampedTx{}
+func (r *DBIndex) GetTxsForAddr(addr ids.ShortID) ([]*displayTx, error) {
+	txs := []*displayTx{}
 	_, err := r.newDBSession("get_txs_for_address").
 		SelectBySql(`
-			SELECT json_serialization, ingested_at
+			SELECT id, json_serialization, ingested_at
 			FROM avm_transactions
 			LEFT JOIN avm_output_addresses AS oa1 ON avm_transactions.id = oa1.transaction_id
 			LEFT JOIN avm_output_addresses AS oa2 ON avm_transactions.id = oa2.transaction_id

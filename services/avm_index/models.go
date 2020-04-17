@@ -152,17 +152,19 @@ type chainInfo struct {
 	AssetCount       int64 `json:"assetCount"`
 }
 
-type timestampedTx struct {
+type displayTx struct {
 	json.RawMessage `db:"json_serialization"`
 	Timestamp       time.Time `db:"ingested_at" json:"timestamp"`
+	ID              rawID     `json:"id"`
 }
 
-func (tt *timestampedTx) MarshalJSON() ([]byte, error) {
+func (dt *displayTx) MarshalJSON() ([]byte, error) {
 	m := map[string]interface{}{}
-	err := json.Unmarshal(tt.RawMessage, &m)
+	err := json.Unmarshal(dt.RawMessage, &m)
 	if err != nil {
 		return nil, err
 	}
-	m["timestamp"] = tt.Timestamp
+	m["id"] = dt.ID
+	m["timestamp"] = dt.Timestamp
 	return json.Marshal(m)
 }
