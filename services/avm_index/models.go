@@ -148,8 +148,10 @@ type chainInfo struct {
 	VM        string `json:"vm"`
 	NetworkID uint32 `json:"networkID"`
 
-	TransactionCount int64 `json:"transactionCount"`
 	AssetCount       int64 `json:"assetCount"`
+	AddressCount     int64 `json:"addressCount"`
+	TransactionCount int64 `json:"transactionCount"`
+	UTXOCount        int64 `json:"utxoCount"`
 }
 
 type displayTx struct {

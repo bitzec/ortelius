@@ -70,12 +70,22 @@ func (i *Index) Add(ingestable services.Ingestable) error {
 }
 
 func (i *Index) GetChainInfo(alias string, networkID uint32) (*chainInfo, error) {
+	assetCount, err := i.db.GetAssetCount()
+	if err != nil {
+		return nil, err
+	}
+
+	addressCount, err := i.db.GetAddressCount()
+	if err != nil {
+		return nil, err
+	}
+
 	txCount, err := i.db.GetTxCount()
 	if err != nil {
 		return nil, err
 	}
 
-	assetCount, err := i.db.GetAssetCount()
+	utxoCount, err := i.db.GetTransactionOutputCount(true)
 	if err != nil {
 		return nil, err
 	}
@@ -86,8 +96,10 @@ func (i *Index) GetChainInfo(alias string, networkID uint32) (*chainInfo, error)
 		NetworkID: networkID,
 		VM:        VMName,
 
-		TransactionCount: txCount,
 		AssetCount:       assetCount,
+		AddressCount:     addressCount,
+		TransactionCount: txCount,
+		UTXOCount:        utxoCount,
 	}, nil
 }
 

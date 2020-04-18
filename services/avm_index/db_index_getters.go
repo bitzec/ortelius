@@ -134,3 +134,28 @@ func (r *DBIndex) GetAsset(aliasOrID string) (asset, error) {
 	err = query.LoadOne(&a)
 	return a, err
 }
+
+func (r *DBIndex) GetAddressCount() (count int64, err error) {
+	err = r.newDBSession("get_address_count").
+		Select("COUNT(DISTINCT(address))").
+		From("avm_output_addresses").
+		LeftJoin("avm_transactions", "avm_transactions.id = avm_output_addresses.transaction_id").
+		Where("chain_id = ?", r.chainID.Bytes()).
+		LoadOne(&count)
+	return count, err
+}
+
+func (r *DBIndex) GetTransactionOutputCount(onlySpent bool) (count int64, err error) {
+	builder := r.newDBSession("get_address_count").
+		Select("COUNT(1)").
+		From("avm_outputs").
+		LeftJoin("avm_transactions", "avm_transactions.id = avm_outputs.transaction_id").
+		Where("avm_transactions.chain_id = ?", r.chainID.Bytes())
+
+	if onlySpent {
+		builder = builder.Where("avm_outputs.redeeming_transaction_id IS NULL")
+	}
+
+	err = builder.LoadOne(&count)
+	return count, err
+}
