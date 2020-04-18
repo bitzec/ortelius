@@ -168,3 +168,8 @@ func (dt *displayTx) MarshalJSON() ([]byte, error) {
 	m["timestamp"] = dt.Timestamp
 	return json.Marshal(m)
 }
+
+type recentTx struct {
+	ID        rawID     `json:"id"`
+	Timestamp time.Time `db:"ingested_at" json:"timestamp"`
+}

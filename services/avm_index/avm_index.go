@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/ava-labs/gecko/genesis"
 	"github.com/ava-labs/gecko/ids"
 	"github.com/ava-labs/gecko/vms/avm"
 
@@ -100,60 +99,30 @@ func (i *Index) GetTxCount() (int64, error) {
 	return i.db.GetTxCount()
 }
 
-func (i *Index) GetTxs() ([]displayTx, error) {
-	return i.db.GetTxs()
-}
-
-func (i *Index) GetTxsForAddr(addr ids.ShortID) ([]*displayTx, error) {
-	return i.db.GetTxsForAddr(addr)
-}
-
 func (i *Index) GetTx(txID ids.ID) (*displayTx, error) {
 	return i.db.GetTx(txID)
 }
 
-func (i *Index) GetTXOsForAddr(addr ids.ShortID, spent *bool) ([]output, error) {
-	return i.db.GetTXOsForAddr(addr, spent)
+func (i *Index) GetTxs(params *ListTxParams) ([]*displayTx, error) {
+	return i.db.GetTxs(params)
 }
 
-func (i *Index) GetAssets() ([]asset, error) {
-	return i.db.GetAssets()
+func (i *Index) GetTxsForAddr(addr ids.ShortID, params *ListTxParams) ([]*displayTx, error) {
+	return i.db.GetTxsForAddr(addr, params)
+}
+
+func (i *Index) GetTxsForAsset(assetID ids.ID, params *ListTxParams) ([]json.RawMessage, error) {
+	return i.db.GetTxsForAsset(assetID, params)
+}
+
+func (i *Index) GetTXOsForAddr(addr ids.ShortID, params *ListTXOParams) ([]output, error) {
+	return i.db.GetTXOsForAddr(addr, params)
+}
+
+func (i *Index) GetAssets(params *ListParams) ([]asset, error) {
+	return i.db.GetAssets(params)
 }
 
 func (i *Index) GetAsset(aliasOrID string) (asset, error) {
 	return i.db.GetAsset(aliasOrID)
-}
-
-func (i *Index) GetTxsForAsset(assetID ids.ID) ([]json.RawMessage, error) {
-	return i.db.GetTxsForAsset(assetID)
-}
-
-func (i *Index) Bootstrap() error {
-	g, err := genesis.VMGenesis(12345, avm.ID)
-	if err != nil {
-		return err
-	}
-
-	avmGenesis := &avm.Genesis{}
-	if err := i.vm.Codec().Unmarshal(g.GenesisData, avmGenesis); err != nil {
-		return err
-	}
-
-	timestamp, err := platformGenesisTimestamp()
-	if err != nil {
-		return err
-	}
-
-	for _, tx := range avmGenesis.Txs {
-		txBytes, err := i.vm.Codec().Marshal(tx)
-		if err != nil {
-			return err
-		}
-		utx := &avm.UniqueTx{TxState: &avm.TxState{Tx: &avm.Tx{UnsignedTx: tx, Creds: nil}}}
-		if err := i.db.AddTx(utx, timestamp, txBytes); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
