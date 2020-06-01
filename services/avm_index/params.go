@@ -227,9 +227,18 @@ func (p *ListTransactionsParams) Apply(b *dbr.SelectBuilder) *dbr.SelectBuilder 
 			Limit(1)
 	}
 
+	// If we want to filter on addresses or assets we'll need to make outputs
+	// available to our query
 	needOutputsJoin := len(p.Addresses) > 0 || p.AssetID != nil
 	if needOutputsJoin {
 		b = b.LeftJoin("avm_outputs", "avm_outputs.transaction_id = avm_transactions.id OR avm_outputs.redeeming_transaction_id = avm_transactions.id")
+
+		// We're want unique txs but joining outputs changes the result to be  the
+		// product of tx*outputs. If there are outputs for a tx there must be 1 and
+		// only 1 output with index 0 so we constrain the outputs in the result to
+		// 1. We are not constraining the joined set, so joining the addresses on
+		// the output set should include all outputs for the txs.
+		b.Where("avm_outputs.output_index = 0")
 	}
 
 	if len(p.Addresses) > 0 {
