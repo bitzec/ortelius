@@ -169,46 +169,46 @@ func (db *DB) indexDecisionTx(ctx services.ConsumerCtx, blockID ids.ID, dTx plat
 }
 
 func (db *DB) indexProposalTx(ctx services.ConsumerCtx, blockID ids.ID, tx platformvm.ProposalTx) error {
-	var (
-		nonce       uint64
-		sig         [65]byte
-		txType      TransactionType
-		shares      uint32
-		subnetID    ids.ID
-		dv          platformvm.DurationValidator
-		destination ids.ShortID
-	)
-
-	switch tx := tx.(type) {
-	case *platformvm.RewardValidatorTx:
-		// return db.indexRewardValidatorTx(ctx, blockID, tx)
-		return nil
-	case *platformvm.AdvanceTimeTx:
-		// return db.indexRewardValidatorTx(ctx, blockID, tx)
-		return nil
-	case *platformvm.AddDefaultSubnetDelegatorTx:
-		nonce, sig, dv, shares, subnetID, txType, destination = tx.Nonce, tx.Sig, tx.DurationValidator, platformvm.NumberOfShares, ids.Empty, TransactionTypeAddDefaultSubnetDelegator, tx.Destination
-	case *platformvm.AddDefaultSubnetValidatorTx:
-		nonce, sig, dv, shares, subnetID, txType, destination = tx.Nonce, tx.Sig, tx.DurationValidator, tx.Shares, ids.Empty, TransactionTypeAddDefaultSubnetValidator, tx.Destination
-	case *platformvm.AddNonDefaultSubnetValidatorTx:
-		nonce, sig, dv, shares, subnetID, txType, destination = tx.Nonce, tx.PayerSig, tx.DurationValidator, 0, tx.Subnet, TransactionTypeAddNonDefaultSubnetValidator, ids.ShortEmpty
-	default:
-		ctx.Job().Event("unknown_transaction_type")
-		return nil
-	}
-
-	txBytes, err := db.codec.Marshal(tx)
-	if err != nil {
-		return err
-	}
-
-	if err := db.indexValidator(ctx, ids.NewID(hashing.ComputeHash256Array(txBytes)), dv, destination, shares, subnetID); err != nil {
-		return err
-	}
-
-	if err := db.indexTransaction(ctx, blockID, txType, ids.NewID(hashing.ComputeHash256Array(txBytes)), nonce, sig); err != nil {
-		return err
-	}
+	// var (
+	// 	nonce       uint64
+	// 	sig         [65]byte
+	// 	txType      TransactionType
+	// 	shares      uint32
+	// 	subnetID    ids.ID
+	// 	dv          platformvm.DurationValidator
+	// 	destination ids.ShortID
+	// )
+	//
+	// switch tx := tx.(type) {
+	// case *platformvm.RewardValidatorTx:
+	// 	// return db.indexRewardValidatorTx(ctx, blockID, tx)
+	// 	return nil
+	// case *platformvm.AdvanceTimeTx:
+	// 	// return db.indexRewardValidatorTx(ctx, blockID, tx)
+	// 	return nil
+	// case *platformvm.AddDefaultSubnetDelegatorTx:
+	// 	nonce, sig, dv, shares, subnetID, txType, destination = tx.Nonce, tx.Sig, tx.DurationValidator, platformvm.NumberOfShares, ids.Empty, TransactionTypeAddDefaultSubnetDelegator, tx.Destination
+	// case *platformvm.AddDefaultSubnetValidatorTx:
+	// 	nonce, sig, dv, shares, subnetID, txType, destination = tx.Nonce, tx.Sig, tx.DurationValidator, tx.Shares, ids.Empty, TransactionTypeAddDefaultSubnetValidator, tx.Destination
+	// case *platformvm.AddNonDefaultSubnetValidatorTx:
+	// 	nonce, sig, dv, shares, subnetID, txType, destination = tx.Nonce, tx.PayerSig, tx.DurationValidator, 0, tx.Subnet, TransactionTypeAddNonDefaultSubnetValidator, ids.ShortEmpty
+	// default:
+	// 	ctx.Job().Event("unknown_transaction_type")
+	// 	return nil
+	// }
+	//
+	// txBytes, err := db.codec.Marshal(tx)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// if err := db.indexValidator(ctx, ids.NewID(hashing.ComputeHash256Array(txBytes)), dv, destination, shares, subnetID); err != nil {
+	// 	return err
+	// }
+	//
+	// if err := db.indexTransaction(ctx, blockID, txType, ids.NewID(hashing.ComputeHash256Array(txBytes)), nonce, sig); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
