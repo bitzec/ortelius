@@ -16,7 +16,9 @@ services:
     image: migrate/migrate:v4.11.0
     volumes:
       - ../../services/db/migrations:/migrations
+      - ./migrate.sh:/migrate.sh
     restart: "no"
     depends_on:
       - mysql
-    command: ["-path=/migrations/", "-database", "mysql://root:password@tcp(mysql:3306)/ortelius_test", "up"]
+    entrypoint: ["/bin/sh"]
+    command: ["/migrate.sh"]
