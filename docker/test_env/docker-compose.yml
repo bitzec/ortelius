@@ -1,4 +1,6 @@
 version: '3.5'
+volumes:
+  mysql-data:
 services:
   mysql:
     image: mysql:8.0
@@ -10,6 +12,11 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: ortelius_test
-
-volumes:
-  mysql-data:
+  migrate:
+    image: migrate/migrate:v4.11.0
+    volumes:
+      - ../../services/db/migrations:/migrations
+    restart: "no"
+    depends_on:
+      - mysql
+    command: ["-path=/migrations/", "-database", "mysql://root:password@tcp(mysql:3306)/ortelius_test", "up"]
